@@ -1,151 +1,49 @@
-from numpy._typing import _UnknownType
-import numpy as np
-from pygjk import shapes
-import matplotlib.pyplot as plt
+from pygjk.tools import *
+from typing import Any
 
 
-class Algorithm:
-    def __init__(self, ax, collection: list[shapes.Shape]):
-        self._ax = ax
-        self.stable_artists: list[_UnknownType] = []
-        self.temporary_artists: list[_UnknownType] = []
+class Algo:
+    _view: Any = None
+    _to_plot: Any = None
+    _current_plot: int = 0
 
-        self.steps = [
-            self.step_initial_direction,
-            self.step_loop,
-            self.step_loop,
-            self.step_loop,
-            self.step_loop,
-            self.step_loop,
+    @staticmethod
+    def initialize(view):
+        Algo._view = view
+        Algo._to_plot = [
+            pg.PlotDataItem() for _ in range(10)
         ]
 
-        self._shapes = collection
-        self.shape_A, self.shape_B = self._shapes[0], self._shapes[1]
-        self.current_step = 0
+        for to_plot in Algo._to_plot:
+            Algo._view.addItem(to_plot)
 
-        self._fig = self._ax.figure
+    @staticmethod
+    def check_collisions(shape1: Shape, shape2: Shape) -> bool:
+        Algo._current_plot = 0
 
-    def reset_figure(self):
-        self._ax.clear()
-        self._ax.set_xlim(-3, 4)
-        self._ax.set_ylim(-3, 4)
-        self._ax.figure.canvas.draw()
-        self._background = self._fig.canvas.copy_from_bbox(self._ax.bbox)
-        self.current_step = 0
-        self.stable_artists = []
-        self.temporary_artists = []
+        points1 = shape1.getPoints()
+        points2 = shape2.getPoints()
 
-        for shape in self._shapes:
-            self.stable_artists.append(self._ax.scatter(
-                shape._points[:, 0], shape._points[:, 1], color=shape._color))
+        center1 = sum(points1) / len(points1)
+        center2 = sum(points2) / len(points2)
 
-        self.stable_artists.append(self._ax.axvline(0, color='black'))
-        self.stable_artists.append(self._ax.axhline(0, color='black'))
+        initial_direction = center1 - center2
+        support1 = Algo.support_point(-initial_direction, points1)
+        support2 = Algo.support_point(initial_direction, points2)
 
-        minkowsky = []
-        for i in range(len(self.shape_A._points)):
-            for j in range(len(self.shape_B._points)):
-                minkowsky.append(
-                    self.shape_A._points[i] - self.shape_B._points[j])
-
-        minkowsky = np.array(minkowsky)
-        self.stable_artists.append(self._ax.scatter(
-            minkowsky[:, 0], minkowsky[:, 1], color='purple'
-        ))
-
-        for artist in self.stable_artists:
-            self._ax.draw_artist(artist)
-
-        self._fig.canvas.blit(self._ax.bbox)
-
-    def forward(self):
-        print("Forwarding")
-        self.steps[self.current_step]()
-        self._fig.canvas.restore_region(self._background)
-
-        for artist in self.stable_artists:
-            self._ax.draw_artist(artist)
-
-        self.current_step += 1
-
-        for artist in self.temporary_artists:
-            self._ax.draw_artist(artist)
-
-        self._fig.canvas.blit(self._ax.bbox)
-
-    def step_initial_direction(self):
-        self.temporary_artists = []
-
-        initial_direction = self.shape_B.center - self.shape_A.center
-
-        self.temporary_artists.append(
-            self._ax.plot([0, initial_direction[0]],
-                          [0, initial_direction[1]],
-                          color='black')[0])
-
-        support_point, sA, sB = support_function(
-            self.shape_A, self.shape_B, initial_direction)
-
-        origin_points = np.array([sA, sB])
-        self.temporary_artists.append(self._ax.scatter(
-            origin_points[:, 0], origin_points[:, 1], color='black'
-        ))
-
-        self.temporary_artists.append(self._ax.scatter(
-            support_point[0], support_point[1], color='red'))
-
-        self.simplex = shapes.Simplex(support_point)
-        self.direction = - support_point
-
-    def step_loop(self):
-        new_support_point, sA, sB = support_function(
-            self.shape_A, self.shape_B, self.direction)
-
-        origin_points = np.array([sA, sB])
-        self.temporary_artists.append(self._ax.scatter(
-            origin_points[:, 0], origin_points[:, 1], color='black'
-        ))
-
-        # Did it cross the origin ? If not, no collision
-        if shapes.Simplex.passed_origin(new_support_point, self.direction) is False:
-            return False
-
-        self.simplex.push(new_support_point)
-        self.temporary_artists.append(self._ax.scatter(
-            new_support_point[0], new_support_point[1], color='red'))
-
-        if len(self.simplex) == 2:
-            print("2 points, checking line")
-            result, self.direction = self.simplex.line_check(self.direction)
-            points = np.array(self.simplex._points)
-
-            self.temporary_artists.append(self._ax.plot(
-                points[:, 0], points[:, 1], color='red')[0])
-
-            if result:
-                print("Colliding !!!!!")
-                return True
-
-        elif len(self.simplex) == 3:
-            print("3 points, checking triangle")
-
-            result, self.direction, origin = self.simplex.triangle_check(
-                self.direction)
-
-            self.temporary_artists.append(self._ax.plot(
-                [origin[0], origin[0] - self.direction[0]],
-                [origin[1], origin[1] - self.direction[1]],
-                color='green'
-            )[0])
-
-            if result:
-                print("Colliding (Triangle)!!")
-                return True
+        # Debug rendering
+        Algo.plot_vector([center2, center1])
+        Algo.plot_vector([center1, support1])
+        Algo.plot_vector([center2, support2])
 
         return False
 
+    @staticmethod
+    def support_point(direction, points):
+        return points[np.argmax(np.dot(points, direction))]
 
-def support_function(shape_A, shape_B, direction):
-    sA = shape_A._support_function(direction)
-    sB = shape_B._support_function(-direction)
-    return sA - sB, sA, sB
+    @staticmethod
+    def plot_vector(vector):
+        vector = np.array(vector)
+        Algo._to_plot[Algo._current_plot].setData(vector[:, 0], vector[:, 1])
+        Algo._current_plot += 1

@@ -1,15 +1,15 @@
-from dataclasses import dataclass
 import numpy as np
+import numpy.typing as npt
 import copy
 import pyqtgraph as pg
 from scipy.spatial.transform import Rotation
 
 
-@dataclass
 class Transform:
-    _position = np.zeros(3, dtype=np.float32)
-    _rotation = np.zeros(3, dtype=np.float32)
-    _scale = np.ones(3, dtype=np.float32)
+    def __init__(self):
+        self._position = np.array([1.0, 1.0, 0.0], dtype=np.float32)
+        self._rotation = np.zeros(3, dtype=np.float32)
+        self._scale = np.ones(3, dtype=np.float32)
 
     def translate(self, translation: list[float]) -> None:
         self._position += np.array(translation)
@@ -18,7 +18,7 @@ class Transform:
         self._rotation += np.array(rotation)
 
     def scale(self, scaling: list[float]) -> None:
-        self._scale += np.array(scaling)
+        self._scale *= np.array(scaling)
 
     def getPosition(self) -> np.ndarray:
         return self._position
@@ -29,30 +29,62 @@ class Transform:
     def getScale(self) -> np.ndarray:
         return self._scale
 
+    @property
+    def position(self) -> np.ndarray:
+        return self._position
 
-@dataclass
+    @position.setter
+    def position(self, value) -> None:
+        self._position = value
+
+
 class Simplex:
-    _points = np.zeros(3, dtype=np.float32)
+    def __init__(self):
+        self._points = np.zeros(3, dtype=np.float32)
 
 
-@dataclass
+class RigidBody:
+    def __init__(self):
+        self._mass = 1.0
+        self._velocity = np.zeros(3, dtype=np.float32)
+        self.gravity = False 
+
+    @property
+    def mass(self) -> float:
+        return self._mass
+
+    @property
+    def velocity(self):
+        return self._velocity
+
+    @velocity.setter
+    def velocity(self, value):
+        self._velocity = value
+
+
 class Shape:
-    _primitive = np.array([
-        [-0.5, -0.5, 0.0],
-        [-0.5, 0.5, 0.0],
-        [0.5, -0.5, 0.0],
-        [0.5, 0.5, 0.0]
-    ])
+    def __init__(self):
+        self._primitive = np.array([
+            [-0.5, -0.5, 0.0],
+            [-0.5, 0.5, 0.0],
+            [0.5, -0.5, 0.0],
+            [0.5, 0.5, 0.0]
+        ])
 
-    _transform = Transform()
+        self._transform = Transform()
+        self._rigid_body = RigidBody()
 
-    _color = np.array([100, 100, 100, 255])
+        self._color = np.array([100, 100, 100, 255])
 
     @property
     def transform(self) -> Transform:
         return self._transform
 
-    def getPoints(self) -> np.ndarray:
+    @property
+    def rigid_body(self) -> RigidBody:
+        return self._rigid_body
+
+    def getPoints(self) -> npt.NDArray[np.float32]:
         modelMatrix = np.ones((4, 4))
 
         modelMatrix = Transformations.scale(
@@ -73,8 +105,16 @@ class Shape:
 
         return new_points
 
+    # TODO make work for any shape
+    def get_indices(self) -> list[int]:
+        return [0, 1, 3, 2, 0]
+
     def getFormattedPoints(self):
         return [{'pos': point, 'brush': pg.mkColor(self._color)} for point in self.getPoints()]
+
+    @property
+    def formatted_color(self):
+        return pg.mkColor(self._color)
 
     def setColor(self, rgba: list[int]) -> None:
         self._color = np.array(rgba)
