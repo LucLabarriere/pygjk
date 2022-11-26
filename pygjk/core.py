@@ -99,7 +99,7 @@ class Application(QtWidgets.QApplication):
             self._renderer.create_random_shape()
 
         self.update_clock = QtCore.QTimer()
-        self.dt = 25 
+        self.dt = 20
         self.update_clock.setInterval(self.dt)
         self.update_clock.timeout.connect(self.update)
         self.update_clock.start()
