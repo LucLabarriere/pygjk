@@ -63,7 +63,7 @@ class RigidBody:
 
 
 class Shape:
-    def __init__(self):
+    def __init__(self, id = 0):
         self._primitive = np.array([
             [-0.5, -0.5, 0.0],
             [-0.5, 0.5, 0.0],
@@ -71,10 +71,14 @@ class Shape:
             [0.5, 0.5, 0.0]
         ])
 
+        self.id = id
         self._transform = Transform()
         self._rigid_body = RigidBody()
 
         self._color = np.array([100, 100, 100, 255])
+
+    def set_id(self, value):
+        self.id = value
 
     @property
     def transform(self) -> Transform:

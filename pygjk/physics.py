@@ -15,11 +15,9 @@ class Engine:
                 if id1 == id2:
                     break
 
-                if id2 != 0:
-                    break
-
                 Algo.check_collisions(shape1, shape2)
                 
+        return None
 
         for id, shape in shapes.items():
             force = np.zeros(3, dtype=np.float32)

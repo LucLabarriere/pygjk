@@ -20,18 +20,18 @@ class Window(QtWidgets.QMainWindow):
         self._request_scale_down = False
 
     def keyPressEvent(self, event):
-        if event.key() == QtCore.Qt.Key.Key_Z:
+        if event.key() == QtCore.Qt.Key.Key_W:
             self._request_go_up = True
         if event.key() == QtCore.Qt.Key.Key_S:
             self._request_go_down = True
-        if event.key() == QtCore.Qt.Key.Key_Q:
+        if event.key() == QtCore.Qt.Key.Key_A:
             self._request_go_left = True
         if event.key() == QtCore.Qt.Key.Key_D:
             self._request_go_right = True
 
         if event.key() == QtCore.Qt.Key.Key_E:
             self._request_rotate_right = True
-        if event.key() == QtCore.Qt.Key.Key_A:
+        if event.key() == QtCore.Qt.Key.Key_Q:
             self._request_rotate_left = True
 
         if event.key() == QtCore.Qt.Key.Key_C:
@@ -40,18 +40,18 @@ class Window(QtWidgets.QMainWindow):
             self._request_scale_down = True
 
     def keyReleaseEvent(self, event):
-        if event.key() == QtCore.Qt.Key.Key_Z:
+        if event.key() == QtCore.Qt.Key.Key_W:
             self._request_go_up = False
         if event.key() == QtCore.Qt.Key.Key_S:
             self._request_go_down = False
-        if event.key() == QtCore.Qt.Key.Key_Q:
+        if event.key() == QtCore.Qt.Key.Key_A:
             self._request_go_left = False
         if event.key() == QtCore.Qt.Key.Key_D:
             self._request_go_right = False
 
         if event.key() == QtCore.Qt.Key.Key_E:
             self._request_rotate_right = False
-        if event.key() == QtCore.Qt.Key.Key_A:
+        if event.key() == QtCore.Qt.Key.Key_Q:
             self._request_rotate_left = False
 
         if event.key() == QtCore.Qt.Key.Key_C:
@@ -80,8 +80,8 @@ class Application(QtWidgets.QApplication):
         self._window.show()
         self._renderer = Renderer(self.view)
 
-        self.view.setXRange(0, 5, padding=0)
-        self.view.setYRange(0, 5, padding=0)
+        self.view.setXRange(-2, 5, padding=0)
+        self.view.setYRange(-2, 5, padding=0)
 
         self.translation_speed = 0.003
         self.rotation_speed = 0.1
@@ -99,7 +99,7 @@ class Application(QtWidgets.QApplication):
             self._renderer.create_random_shape()
 
         self.update_clock = QtCore.QTimer()
-        self.dt = 15 
+        self.dt = 25 
         self.update_clock.setInterval(self.dt)
         self.update_clock.timeout.connect(self.update)
         self.update_clock.start()
@@ -107,6 +107,7 @@ class Application(QtWidgets.QApplication):
         sys.exit(self.exec())
 
     def update(self):
+        self._renderer.reset_colors()
         main_shape = self._renderer.get_shape(self.main_shape_id)
 
         if self._window._request_go_up:
@@ -136,6 +137,6 @@ class Application(QtWidgets.QApplication):
             main_shape.transform.scale(
                 [- self.dt * self.scale_speed, - self.dt * self.scale_speed, 0.0])
 
-        self._renderer.render()
         physics.Engine.update(self.dt, self._renderer.shapes)
+        self._renderer.render()
 

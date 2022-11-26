@@ -17,6 +17,12 @@ class Renderer:
         self._lines = {}
         self._shapes: dict[int, Shape] = {}
 
+        pg.setConfigOptions(antialias=True)
+
+    def reset_colors(self):
+        for shape in self._shapes.values():
+            shape.setColor([255, 255, 255, 255])
+
     def add_shape(self, shape: Shape) -> int:
         self._shapes[self._next_id] = shape
         self._lines[self._next_id] = pg.PlotDataItem()
@@ -29,6 +35,7 @@ class Renderer:
     def create_shape(self) -> tuple[int, Shape]:
         shape = Shape()
         id = self.add_shape(shape)
+        shape.set_id(id)
 
         return (id, shape)
 
