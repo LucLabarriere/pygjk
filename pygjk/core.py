@@ -72,7 +72,6 @@ class Application(QtWidgets.QApplication):
 
         self.view = self.canvas.addViewBox()
         self.view.setAspectLocked(True)
-        Algo.initialize(self.view)
 
         self._window = Window()
         self._window.setCentralWidget(self.main_widget)
@@ -83,9 +82,9 @@ class Application(QtWidgets.QApplication):
         self.view.setXRange(-2, 5, padding=0)
         self.view.setYRange(-2, 5, padding=0)
 
-        self.translation_speed = 0.003
-        self.rotation_speed = 0.1
-        self.scale_speed = 0.001
+        self.translation_speed = 0.006
+        self.rotation_speed = 0.5
+        self.scale_speed = 0.00001
 
         # API Usage :
         # Creating Shape object which contains a transform and primitive points
@@ -95,11 +94,11 @@ class Application(QtWidgets.QApplication):
         self._renderer.get_shape(self.main_shape_id).setColor([255, 255, 255, 255])
 
         # Creating random shapes
-        for _ in range(5):
+        for _ in range(20):
             self._renderer.create_random_shape()
 
         self.update_clock = QtCore.QTimer()
-        self.dt = 20
+        self.dt = 17
         self.update_clock.setInterval(self.dt)
         self.update_clock.timeout.connect(self.update)
         self.update_clock.start()
@@ -137,6 +136,8 @@ class Application(QtWidgets.QApplication):
             main_shape.transform.scale(
                 [- self.dt * self.scale_speed, - self.dt * self.scale_speed, 0.0])
 
+        main_shape.set_dirty()
         physics.Engine.update(self.dt, self._renderer.shapes)
         self._renderer.render()
+        self._renderer.render_update_time(physics.Engine.get_update_time())
 

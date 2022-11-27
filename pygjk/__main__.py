@@ -7,7 +7,7 @@ from pstats import SortKey
 # Switch to snake case naming convention
 
 def main():
-    app = core.Application()
+    core.Application()
 
 if __name__ == '__main__':
     cProfile.run('main()', "output.dat")

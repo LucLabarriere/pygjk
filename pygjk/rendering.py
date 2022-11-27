@@ -12,10 +12,10 @@ class Renderer:
 
     def __init__(self, view):
         self._view = view
-        self._scatter = pg.ScatterPlotItem(size=10)
-        # self._view.addItem(self.scatter)
         self._lines = {}
         self._shapes: dict[int, Shape] = {}
+        self._text = pg.TextItem()
+        self._view.addItem(self._text)
 
         pg.setConfigOptions(antialias=True)
 
@@ -86,7 +86,6 @@ class Renderer:
     def render(self) -> None:
         points = np.array([shape.getFormattedPoints()
                           for shape in self._shapes.values()]).flatten()
-        self.scatter.setData(points)
 
         for id, shape in self._shapes.items():
             indices = shape.get_indices()
@@ -97,9 +96,10 @@ class Renderer:
             self.lines[id].setData(points[:,0], points[:,1])
             self.lines[id].setPen(shape.formatted_color)
 
-    @property
-    def scatter(self):
-        return self._scatter
+    def render_update_time(self, update_time: float) -> None:
+        self._text.setText(f"Update time: {update_time*1000:.2f} ms")
+        pass
+
     @property
     def lines(self):
         return self._lines

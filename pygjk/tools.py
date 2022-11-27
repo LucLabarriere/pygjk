@@ -76,6 +76,8 @@ class Shape:
         self._rigid_body = RigidBody()
 
         self._color = np.array([100, 100, 100, 255])
+        self._is_dirty = True
+        self._transformed_points = self._primitive
 
     def set_id(self, value):
         self.id = value
@@ -88,26 +90,37 @@ class Shape:
     def rigid_body(self) -> RigidBody:
         return self._rigid_body
 
+    def set_dirty(self):
+        self._is_dirty = True
+
     def getPoints(self) -> npt.NDArray[np.float32]:
-        modelMatrix = np.ones((4, 4))
+        if self._is_dirty:
+            modelMatrix = np.ones((4, 4))
 
-        modelMatrix = Transformations.scale(
-            self._transform.getScale(), modelMatrix
-        )
-        modelMatrix = Transformations.rotate(
-            self._transform.getRotation(), modelMatrix
-        )
-        modelMatrix = Transformations.translate(
-            self._transform.getPosition(), modelMatrix
-        )
+            modelMatrix = Transformations.scale(
+                self._transform.getScale(), modelMatrix
+            )
+            modelMatrix = Transformations.rotate(
+                self._transform.getRotation(), modelMatrix
+            )
+            modelMatrix = Transformations.translate(
+                self._transform.getPosition(), modelMatrix
+            )
 
-        new_points = copy.copy(self._primitive)
+            #TODO remove copy here
+            new_points = copy.copy(self._primitive)
+            new_points = np.concatenate((new_points, np.ones([new_points.shape[0], 1])), axis=1)
+            new_points = np.dot(modelMatrix, new_points.T)
+            new_points = new_points[:3].T
 
-        for i in range(new_points.shape[0]):
-            new_points[i] = np.dot(
-                modelMatrix, np.array([*new_points[i], 1]))[:3]
+            #for i in range(new_points.shape[0]):
+            #    new_points[i] = np.dot(
+            #        modelMatrix, np.array([*new_points[i], 1]))[:3]
 
-        return new_points
+            self._transformed_points = new_points
+            self._is_dirty = False 
+
+        return self._transformed_points
 
     # TODO make work for any shape
     def get_indices(self) -> list[int]:
@@ -151,3 +164,9 @@ class Transformations:
         mat4 = scalingMatrix * mat4
 
         return mat4
+
+class Collision:
+    def __init__(self, shape_1, shape_2, collides=True):
+        self.shape_1_id = shape_1.id
+        self.shape_2_id = shape_2.id
+        self.collides = collides
