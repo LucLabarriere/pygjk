@@ -2,7 +2,7 @@ from pygjk.tools import Transform, Shape
 from pygjk.algo import Algo
 import numpy.typing as npt
 import numpy as np
-from concurrent.futures import ProcessPoolExecutor
+from concurrent.futures import ThreadPoolExecutor
 import time
 
 
@@ -26,11 +26,11 @@ class Engine:
     def update_multi_threaded(shapes) -> None:
         jobs = []
 
-        with ProcessPoolExecutor(max_workers=4) as executor:
-            for id1, shape1 in shapes.items():
-                for id2, shape2 in shapes.items():
-                    if id1 == id2:
-                        break
+        with ThreadPoolExecutor(max_workers=4) as executor:
+            for i in range(len(shapes)):
+                for j in range(i + 1, len(shapes)):
+                    shape1 = shapes[i]
+                    shape2 = shapes[j]
 
                     jobs.append(executor.submit(Algo.check_collisions, shape1, shape2))
 
@@ -45,11 +45,12 @@ class Engine:
     @staticmethod
     def update_single_threaded(shapes) -> None:
         collisions = []
-        for id1, shape1 in shapes.items():
-            for id2, shape2 in shapes.items():
-                if id1 == id2:
-                    break
+        shapes = list(shapes.values())
 
+        for i in range(len(shapes)):
+            for j in range(i + 1, len(shapes)):
+                shape1 = shapes[i]
+                shape2 = shapes[j]
                 collisions.append(Algo.check_collisions(shape1, shape2))
 
         for collision in collisions:
