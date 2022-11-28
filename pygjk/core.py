@@ -19,6 +19,7 @@ class Window(QtWidgets.QMainWindow):
 
     def __init__(self):
         super().__init__()
+
         self._request_go_up = False
         self._request_go_down = False
         self._request_go_left = False
@@ -28,7 +29,7 @@ class Window(QtWidgets.QMainWindow):
         self._request_scale_up = False
         self._request_scale_down = False
 
-        if os.environ.get('LANG') == 'FR_fr':
+        if QtCore.QLocale().name() == 'fr_FR':
             Window._key_UP = QtCore.Qt.Key.Key_Z
             Window._key_LEFT = QtCore.Qt.Key.Key_Q
             Window._key_ROTATE_RIGHT = QtCore.Qt.Key.Key_A
