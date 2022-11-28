@@ -20,6 +20,9 @@ class Transform:
     def scale(self, scaling: list[float]) -> None:
         self._scale *= np.array(scaling)
 
+    def increment_scale(self, value: list[float]) -> None:
+        self._scale += np.array(value)
+
     def getPosition(self) -> np.ndarray:
         return self._position
 

@@ -1,4 +1,4 @@
-import sys
+import sys, os
 from PyQt6 import QtWidgets, QtCore
 import pyqtgraph as pg
 from pygjk.rendering import Renderer
@@ -8,6 +8,15 @@ from pygjk.algo import Algo
 
 
 class Window(QtWidgets.QMainWindow):
+    _key_UP = QtCore.Qt.Key.Key_W
+    _key_LEFT = QtCore.Qt.Key.Key_A
+    _key_DOWN = QtCore.Qt.Key.Key_S
+    _key_RIGHT = QtCore.Qt.Key.Key_D
+    _key_SCALE_UP = QtCore.Qt.Key.Key_C
+    _key_SCALE_DOWN = QtCore.Qt.Key.Key_X
+    _key_ROTATE_LEFT= QtCore.Qt.Key.Key_E
+    _key_ROTATE_RIGHT = QtCore.Qt.Key.Key_Q
+
     def __init__(self):
         super().__init__()
         self._request_go_up = False
@@ -19,44 +28,49 @@ class Window(QtWidgets.QMainWindow):
         self._request_scale_up = False
         self._request_scale_down = False
 
+        if os.environ.get('LANG') == 'FR_fr':
+            Window._key_UP = QtCore.Qt.Key.Key_Z
+            Window._key_LEFT = QtCore.Qt.Key.Key_Q
+            Window._key_ROTATE_RIGHT = QtCore.Qt.Key.Key_A
+
     def keyPressEvent(self, event):
-        if event.key() == QtCore.Qt.Key.Key_W:
+        if event.key() == Window._key_UP:
             self._request_go_up = True
-        if event.key() == QtCore.Qt.Key.Key_S:
+        if event.key() == Window._key_DOWN: 
             self._request_go_down = True
-        if event.key() == QtCore.Qt.Key.Key_A:
+        if event.key() == Window._key_LEFT:
             self._request_go_left = True
-        if event.key() == QtCore.Qt.Key.Key_D:
+        if event.key() == Window._key_RIGHT:
             self._request_go_right = True
 
-        if event.key() == QtCore.Qt.Key.Key_E:
+        if event.key() == Window._key_ROTATE_RIGHT:
             self._request_rotate_right = True
-        if event.key() == QtCore.Qt.Key.Key_Q:
+        if event.key() == Window._key_ROTATE_LEFT:
             self._request_rotate_left = True
 
-        if event.key() == QtCore.Qt.Key.Key_C:
+        if event.key() == Window._key_SCALE_UP: 
             self._request_scale_up = True
-        if event.key() == QtCore.Qt.Key.Key_X:
+        if event.key() == Window._key_SCALE_DOWN:
             self._request_scale_down = True
 
     def keyReleaseEvent(self, event):
-        if event.key() == QtCore.Qt.Key.Key_W:
+        if event.key() == Window._key_UP:
             self._request_go_up = False
-        if event.key() == QtCore.Qt.Key.Key_S:
+        if event.key() == Window._key_DOWN: 
             self._request_go_down = False
-        if event.key() == QtCore.Qt.Key.Key_A:
+        if event.key() == Window._key_LEFT:
             self._request_go_left = False
-        if event.key() == QtCore.Qt.Key.Key_D:
+        if event.key() == Window._key_RIGHT:
             self._request_go_right = False
 
-        if event.key() == QtCore.Qt.Key.Key_E:
+        if event.key() == Window._key_ROTATE_RIGHT:
             self._request_rotate_right = False
-        if event.key() == QtCore.Qt.Key.Key_Q:
+        if event.key() == Window._key_ROTATE_LEFT:
             self._request_rotate_left = False
 
-        if event.key() == QtCore.Qt.Key.Key_C:
+        if event.key() == Window._key_SCALE_UP: 
             self._request_scale_up = False
-        if event.key() == QtCore.Qt.Key.Key_X:
+        if event.key() == Window._key_SCALE_DOWN:
             self._request_scale_down = False
 
 
@@ -84,7 +98,7 @@ class Application(QtWidgets.QApplication):
 
         self.translation_speed = 0.006
         self.rotation_speed = 0.5
-        self.scale_speed = 0.00001
+        self.scale_speed = 0.01
 
         # API Usage :
         # Creating Shape object which contains a transform and primitive points
@@ -130,11 +144,9 @@ class Application(QtWidgets.QApplication):
                 [0.0, 0.0, -self.dt * self.rotation_speed])
 
         if self._window._request_scale_up:
-            main_shape.transform.scale(
-                [self.dt * self.scale_speed, self.dt * self.scale_speed, 0.0])
+            main_shape.transform.increment_scale([self.dt * self.scale_speed, self.dt * self.scale_speed, 0.0])
         if self._window._request_scale_down:
-            main_shape.transform.scale(
-                [- self.dt * self.scale_speed, - self.dt * self.scale_speed, 0.0])
+            main_shape.transform.increment_scale([- self.dt * self.scale_speed, - self.dt * self.scale_speed, 0.0])
 
         main_shape.set_dirty()
         physics.Engine.update(self.dt, self._renderer.shapes)
