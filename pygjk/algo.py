@@ -5,8 +5,8 @@ from typing import Any
 class Algo:
     @staticmethod
     def check_collisions(shape_1: Shape, shape_2: Shape) -> Collision:
-        points_1 = shape_1.getPoints()
-        points_2 = shape_2.getPoints()
+        points_1 = shape_1.get_points()
+        points_2 = shape_2.get_points()
 
         center_1 = Algo.center(points_1)
         center_2 = Algo.center(points_2)

@@ -21,7 +21,7 @@ class Renderer:
 
     def reset_colors(self):
         for shape in self._shapes.values():
-            shape.setColor([255, 255, 255, 255])
+            shape.set_color([255, 255, 255, 255])
 
     def add_shape(self, shape: Shape) -> int:
         self._shapes[self._next_id] = shape
@@ -68,7 +68,7 @@ class Renderer:
         shape.transform.translate(translation)
         shape.transform.rotate(rotation)
         shape.transform.scale(scale)
-        shape.setColor(color)
+        shape.set_color(color)
 
         return (id, shape)
 
@@ -84,12 +84,12 @@ class Renderer:
         del self._lines[shape_id]
 
     def render(self) -> None:
-        points = np.array([shape.getFormattedPoints()
+        points = np.array([shape.get_formatted_points()
                           for shape in self._shapes.values()]).flatten()
 
         for id, shape in self._shapes.items():
             indices = shape.get_indices()
-            points = shape.getFormattedPoints()
+            points = shape.get_formatted_points()
             sorted_points = [points[i] for i in indices]
             points = np.array([point['pos'] for point in sorted_points])
 

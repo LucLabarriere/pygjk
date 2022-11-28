@@ -39,8 +39,8 @@ class Engine:
 
             if res.collides:
                 # Show shapes in red
-                shapes[res.shape_1_id].setColor([255, 0, 0, 255])
-                shapes[res.shape_2_id].setColor([255, 0, 0, 255])
+                shapes[res.shape_1_id].set_color([255, 0, 0, 255])
+                shapes[res.shape_2_id].set_color([255, 0, 0, 255])
 
     @staticmethod
     def update_single_threaded(shapes) -> None:
@@ -56,8 +56,8 @@ class Engine:
         for collision in collisions:
             if collision.collides:
                 # Show shapes in red
-                shapes[collision.shape_1_id].setColor([255, 0, 0, 255])
-                shapes[collision.shape_2_id].setColor([255, 0, 0, 255])
+                shapes[collision.shape_1_id].set_color([255, 0, 0, 255])
+                shapes[collision.shape_2_id].set_color([255, 0, 0, 255])
 
     @staticmethod
     def get_update_time() -> float:

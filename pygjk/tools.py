@@ -23,13 +23,13 @@ class Transform:
     def increment_scale(self, value: list[float]) -> None:
         self._scale += np.array(value)
 
-    def getPosition(self) -> np.ndarray:
+    def get_position(self) -> np.ndarray:
         return self._position
 
-    def getRotation(self) -> np.ndarray:
+    def get_rotation(self) -> np.ndarray:
         return self._rotation
 
-    def getScale(self) -> np.ndarray:
+    def get_scale(self) -> np.ndarray:
         return self._scale
 
     @property
@@ -96,18 +96,18 @@ class Shape:
     def set_dirty(self):
         self._is_dirty = True
 
-    def getPoints(self) -> npt.NDArray[np.float32]:
+    def get_points(self) -> npt.NDArray[np.float32]:
         if self._is_dirty:
             modelMatrix = np.ones((4, 4))
 
             modelMatrix = Transformations.scale(
-                self._transform.getScale(), modelMatrix
+                self._transform.get_scale(), modelMatrix
             )
             modelMatrix = Transformations.rotate(
-                self._transform.getRotation(), modelMatrix
+                self._transform.get_rotation(), modelMatrix
             )
             modelMatrix = Transformations.translate(
-                self._transform.getPosition(), modelMatrix
+                self._transform.get_position(), modelMatrix
             )
 
             #TODO remove copy here
@@ -129,14 +129,14 @@ class Shape:
     def get_indices(self) -> list[int]:
         return [0, 1, 3, 2, 0]
 
-    def getFormattedPoints(self):
-        return [{'pos': point, 'brush': pg.mkColor(self._color)} for point in self.getPoints()]
+    def get_formatted_points(self):
+        return [{'pos': point, 'brush': pg.mkColor(self._color)} for point in self.get_points()]
 
     @property
     def formatted_color(self):
         return pg.mkColor(self._color)
 
-    def setColor(self, rgba: list[int]) -> None:
+    def set_color(self, rgba: list[int]) -> None:
         self._color = np.array(rgba)
 
 

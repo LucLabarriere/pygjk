@@ -105,10 +105,10 @@ class Application(QtWidgets.QApplication):
         self.main_shape_id, _ = self._renderer.create_shape()
 
         # Setting the color of a shape for pyqtgraph rendering
-        self._renderer.get_shape(self.main_shape_id).setColor([255, 255, 255, 255])
+        self._renderer.get_shape(self.main_shape_id).set_color([255, 255, 255, 255])
 
         # Creating random shapes
-        for _ in range(20):
+        for _ in range(30):
             self._renderer.create_random_shape()
 
         self.update_clock = QtCore.QTimer()
